@@ -1,11 +1,11 @@
-const CACHE_NAME = 'glow-cache-v3';
+const CACHE_NAME = 'glow-cache-v4';
 
 const ASSETS = [
-  '/glow/',
-  '/glow/index.html',
-  '/glow/manifest.json',
-  '/glow/icons/icon-192.png',
-  '/glow/icons/icon-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
