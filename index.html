@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GLOW - Gasolina</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+
+    <!-- Chart.js para el gráfico -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --muted: #b3b3b3;
+            --accent: #00e5ff;
+            --accent-dark: #00b3cc;
+        }
+        body.light {
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #121212;
+            --muted: #555555;
+            --accent: #0077ff;
+            --accent-dark: #005fcc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 80px;
+            overscroll-behavior-y: none;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container { width: 100%; max-width: 480px; }
+        h1 { text-align: center; color: var(--accent); text-shadow: 0 0 10px var(--accent); margin-bottom: 10px; font-size: 2.5em; }
+        .subtitle { text-align: center; color: var(--muted); margin-bottom: 20px; font-size: 0.9em; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); margin-bottom: 20px; transition: background 0.3s, transform 0.15s; }
+        .card:hover { transform: translateY(-1px); }
+        label { display: block; margin-top: 10px; font-size: 1.05em; color: var(--muted); }
+        input, select { width: 100%; padding: 12px; margin-top: 6px; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 12px; box-sizing: border-box; font-size: 1.05em; }
+        body.light input, body.light select {
+            background: #f0f0f0;
+            border-color: #ccc;
+            color: #121212;
+        }
+        button { width: 100%; padding: 14px; margin-top: 18px; background: var(--accent); color: #121212; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: transform 0.1s, background 0.2s; }
+        button:active { transform: scale(0.97); background: var(--accent-dark); }
+        .btn-secondary { background: #2d2d2d; color: var(--accent); margin-top: 10px; border: 1px solid #444; }
+        body.light .btn-secondary { background: #ffffff; border-color: #ddd; }
+        .btn-exit { background: #331a1a; color: #ff4d4d; border: 1px solid #4d2626; margin-top: 30px; font-size: 0.95em; padding: 10px; }
+        .history-item { background: #2d2d2d; padding: 12px; border-radius: 12px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        body.light .history-item { background: #f0f0f0; }
+        .total-box { text-align: center; font-size: 2.2em; color: var(--accent); margin-top: 5px; font-weight: bold; }
+        .delete-btn { background: #ff4d4d; color: white; border: none; border-radius: 8px; padding: 8px 10px; width: auto; font-size: 1em; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-item { background: #2d2d2d; border-radius: 12px; padding: 10px; text-align: center; font-size: 0.9em; color: var(--muted); }
+        body.light .stat-item { background: #f0f0f0; }
+        .stat-value { display: block; margin-top: 4px; font-size: 1.2em; color: var(--accent); font-weight: bold; }
+        canvas { max-width: 100%; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .theme-toggle { width: auto; padding: 8px 12px; font-size: 0.85em; margin-top: 0; }
+
+        /* Splash screen */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #121212;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: #ffffff;
+        }
+        #splash h1 {
+            margin-bottom: 10px;
+        }
+        .loader {
+            border: 4px solid #333;
+            border-top: 4px solid #00e5ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.9s linear infinite;
+            margin-top: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="splash">
+    <h1>🚘 GLOW</h1>
+    <div>Arrancando la app...</div>
+    <div class="loader"></div>
+</div>
+
+<div class="container" style="display:none;" id="appRoot">
+    <div class="top-bar">
+        <h1>🚘 GLOW</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">Modo</button>
+    </div>
+    <div class="subtitle">Control rápido y visual de tus repostajes</div>
+    
+    <!-- Formulario -->
+    <div class="card">
+        <label for="date">Fecha</label>
+        <input type="date" id="date">
+
+        <label for="station">Gasolinera</label>
+        <select id="station">
+            <option value="Repsol">Repsol</option>
+            <option value="Disa">Disa</option>
+            <option value="Cepsa">Cepsa</option>
+            <option value="BP">BP</option>
+            <option value="Shell">Shell</option>
+            <option value="Océano Telde">Océano Telde</option>
+            <option value="Plenoil">Plenoil</option>
+            <option value="Otra">Otra...</option>
+        </select>
+
+        <label for="amount">Gasto (€)</label>
+        <input type="text" inputmode="decimal" id="amount" placeholder="Ej. 20.00">
+
+        <button onclick="addExpense()">Añadir Repostaje</button>
+        <button class="btn-secondary" onclick="exportCSV()">Exportar historial (CSV)</button>
+    </div>
+
+    <!-- Totales -->
+    <div class="card">
+        <h2 style="font-size: 1.1em; margin-top: 0; text-align: center; color: var(--muted);">Resumen rápido</h2>
+        <div class="total-box" id="currentMonthTotal">0.00 €</div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                Mes actual
+                <span class="stat-value" id="statMonth">0.00 €</span>
+            </div>
+            <div class="stat-item">
+                Año actual
+                <span class="stat-value" id="statYear">0.00 €</span>
+            </div>
+            <div class="stat-item">
+                Total histórico
+                <span class="stat-value" id="statTotal">0.00 €</span>
+            </div>
+            <div class="stat-item">
+                Media por repostaje
+                <span class="stat-value" id="statAvg">0.00 €</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="card">
+        <h2 style="font-size: 1.1em; margin-top: 0; text-align: center; color: var(--muted);">Gasto por mes (año actual)</h2>
+        <canvas id="chartCanvas" height="200"></canvas>
+    </div>
+
+    <!-- Historial -->
+    <button class="btn-secondary" id="toggleBtn" onclick="toggleHistory()">Ver Historial Completo</button>
+    <div class="card" id="historyCard" style="display: none; margin-top: 15px;">
+        <h2 style="font-size: 1.1em; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 8px;">Todos los Repostajes</h2>
+        <div id="historyList"></div>
+    </div>
+
+    <button class="btn-exit" onclick="exitApp()">CERRAR APLICACIÓN</button>
+</div>
+
+<script>
+    // Registrar Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+
+    // Tema (oscuro / claro)
+    function applyTheme(theme) {
+        if (theme === 'light') {
+            document.body.classList.add('light');
+        } else {
+            document.body.classList.remove('light');
+        }
+    }
+
+    function toggleTheme() {
+        const current = localStorage.getItem('glowTheme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('glowTheme', next);
+        applyTheme(next);
+    }
+
+    applyTheme(localStorage.getItem('glowTheme') || 'dark');
+
+    // Splash screen
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('appRoot').style.display = 'block';
+        }, 500);
+    });
+
+    const dateInput = document.getElementById('date');
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    let expenses = JSON.parse(localStorage.getItem('glowExpenses')) || [];
+    let chartInstance = null;
+
+    function saveExpenses() {
+        localStorage.setItem('glowExpenses', JSON.stringify(expenses));
+    }
+
+    function formatEuro(value) {
+        return parseFloat(value).toFixed(2) + ' €';
+    }
+
+    function updateStats() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentYearMonth = now.toISOString().slice(0, 7);
+
+        let totalMonth = 0;
+        let totalYear = 0;
+        let totalAll = 0;
+
+        expenses.forEach(exp => {
+            const amount = parseFloat(exp.amount);
+            const ym = exp.date.slice(0, 7);
+            const year = parseInt(exp.date.slice(0, 4), 10);
+
+            totalAll += amount;
+            if (ym === currentYearMonth) totalMonth += amount;
+            if (year === currentYear) totalYear += amount;
+        });
+
+        const avg = expenses.length ? totalAll / expenses.length : 0;
+
+        document.getElementById('currentMonthTotal').innerText = formatEuro(totalMonth);
+        document.getElementById('statMonth').innerText = formatEuro(totalMonth);
+        document.getElementById('statYear').innerText = formatEuro(totalYear);
+        document.getElementById('statTotal').innerText = formatEuro(totalAll);
+        document.getElementById('statAvg').innerText = formatEuro(avg);
+    }
+
+    function buildChart() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        const data = new Array(12).fill(0);
+
+        expenses.forEach(exp => {
+            const d = new Date(exp.date);
+            if (d.getFullYear() === currentYear) {
+                const m = d.getMonth();
+                data[m] += parseFloat(exp.amount);
+            }
+        });
+
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: '€ por mes',
+                    data,
+                    backgroundColor: 'rgba(0, 229, 255, 0.4)',
+                    borderColor: 'rgba(0, 229, 255, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: getComputedStyle(document.body).getPropertyValue('--text') }
+                    },
+                    x: {
+                        ticks: { color: getComputedStyle(document.body).getPropertyValue('--text') }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: getComputedStyle(document.body).getPropertyValue('--text') }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateUI() {
+        const historyList = document.getElementById('historyList');
+        historyList.innerHTML = '';
+
+        // Ordenar por fecha (más reciente primero)
+        expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        expenses.forEach((exp, index) => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div>
+                    <strong>${exp.station}</strong><br>
+                    <small style="color:var(--muted);">${exp.date}</small>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-weight:bold;">${exp.amount} €</span>
+                    <button class="delete-btn" aria-label="Eliminar repostaje" onclick="deleteExpense(${index})">❌</button>
+                </div>`;
+            historyList.appendChild(div);
+        });
+
+        updateStats();
+        buildChart();
+    }
+
+    function addExpense() {
+        const date = document.getElementById('date').value;
+        const station = document.getElementById('station').value;
+        let amount = document.getElementById('amount').value.replace(',', '.').trim();
+
+        if (!date) {
+            return alert('Selecciona una fecha.');
+        }
+
+        // Validación del importe
+        if (!/^\d+(\.\d{1,2})?$/.test(amount)) {
+            return alert('Introduce un importe válido (ej: 20.50)');
+        }
+
+        // Evitar fechas futuras
+        if (new Date(date) > new Date()) {
+            return alert('La fecha no puede ser futura.');
+        }
+
+        expenses.unshift({ date, station, amount: parseFloat(amount).toFixed(2) });
+        saveExpenses();
+        document.getElementById('amount').value = '';
+        updateUI();
+    }
+
+    function deleteExpense(index) {
+        if (confirm('¿Borrar este repostaje?')) {
+            expenses.splice(index, 1);
+            saveExpenses();
+            updateUI();
+        }
+    }
+
+    function toggleHistory() {
+        const card = document.getElementById('historyCard');
+        const btn = document.getElementById('toggleBtn');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+        btn.innerText = card.style.display === 'none' ? 'Ver Historial Completo' : 'Ocultar Historial';
+    }
+
+    function exitApp() {
+        if (confirm('¿Quieres salir de la aplicación?')) {
+            window.close();
+        }
+    }
+
+    // Exportar CSV
+    function exportCSV() {
+        if (!expenses.length) {
+            return alert('No hay datos para exportar.');
+        }
+        let csv = 'fecha,gasolinera,importe\n';
+        expenses.forEach(exp => {
+            csv += `${exp.date},${exp.station},${exp.amount}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'glow_historial.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
