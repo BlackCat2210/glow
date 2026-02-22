@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GLOW - Gasolina</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#121212">
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 80px;
+      overscroll-behavior-y: none;
+      min-height: 100vh;
+    }
+    .container { width: 100%; max-width: 480px; }
+    h1 { text-align: center; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; margin-bottom: 25px; font-size: 2.5em; }
+    .card { background: #1e1e1e; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); margin-bottom: 20px; }
+    label { display: block; margin-top: 15px; font-size: 1.05em; color: #b3b3b3; }
+    input, select {
+      width: 100%; padding: 15px; margin-top: 8px;
+      background: #2d2d2d; border: 1px solid #444; color: white;
+      border-radius: 12px; box-sizing: border-box; font-size: 1.05em;
+    }
+    button {
+      width: 100%; padding: 16px; margin-top: 20px;
+      background: #00e5ff; color: #121212; border: none;
+      border-radius: 12px; font-weight: bold; font-size: 1.1em;
+      cursor: pointer; transition: transform 0.1s;
+    }
+    button:active { transform: scale(0.98); background: #00b3cc; }
+    .btn-secondary { background: #2d2d2d; color: #00e5ff; margin-top: 10px; border: 1px solid #444; }
+    .history-item {
+      background: #2d2d2d; padding: 15px; border-radius: 12px;
+      margin-top: 12px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .delete-btn {
+      background: #ff4d4d; color: white; border: none;
+      border-radius: 8px; padding: 8px 10px; width: auto; font-size: 0.95em;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .stat-box {
+      background: #2d2d2d;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #b3b3b3;
+    }
+    .stat-value {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.3em;
+      color: #00e5ff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚘 GLOW</h1>
+
+    <div class="card">
+      <label for="date">Fecha</label>
+      <input type="date" id="date">
+
+      <label for="station">Gasolinera</label>
+      <select id="station">
+        <option value="Repsol">Repsol</option>
+        <option value="Disa">Disa</option>
+        <option value="Cepsa">Cepsa</option>
+        <option value="BP">BP</option>
+        <option value="Shell">Shell</option>
+        <option value="Océano Telde">Océano Telde</option>
+        <option value="Plenoil">Plenoil</option>
+        <option value="Otra">Otra...</option>
+      </select>
+
+      <label for="amount">Gasto (€)</label>
+      <input type="text" inputmode="decimal" id="amount" placeholder="Ej. 20,00 o 20.00">
+
+      <button onclick="addExpense()">Añadir repostaje</button>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1em;margin-top:0;text-align:center;color:#b3b3b3;">Resumen</h2>
+      <div class="stats-grid">
+        <div class="stat-box">
+          Mes actual
+          <span class="stat-value" id="currentMonthTotal">0.00 €</span>
+        </div>
+        <div class="stat-box">
+          Año actual
+          <span class="stat-value" id="currentYearTotal">0.00 €</span>
+        </div>
+        <div class="stat-box">
+          Nº repostajes
+          <span class="stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat-box">
+          Media por repostaje
+          <span class="stat-value" id="avgPerFill">0.00 €</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-secondary" id="toggleBtn" onclick="toggleHistory()">Ver historial completo</button>
+
+    <div class="card" id="historyCard" style="display:none;margin-top:20px;">
+      <h2 style="font-size:1.1em;margin-top:0;border-bottom:1px solid #444;padding-bottom:10px;">Todos los repostajes</h2>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
