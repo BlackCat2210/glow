@@ -35,12 +35,14 @@
       color: #121212;
     }
 
-    /* CABECERA CORREGIDA */
+    /* CABECERA CENTRADA */
     #headerBar {
       width: 100%;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;      /* CENTRA EL TÍTULO */
       align-items: center;
+      position: relative;           /* PERMITE POSICIONAR EL ICONO */
+      padding: 10px 0;
       margin-bottom: 15px;
     }
 
@@ -49,14 +51,20 @@
       font-weight: bold;
       color: #00e5ff;
       text-shadow: 0 0 10px #00e5ff;
+      line-height: 1;
     }
 
     .icon-btn {
+      position: absolute;           /* ICONO A LA DERECHA */
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
       background: none;
       border: none;
-      font-size: 1.8em;
+      font-size: 1.9em;
       cursor: pointer;
       color: #00e5ff;
+      line-height: 1;
     }
 
     body.light .icon-btn {
@@ -217,7 +225,7 @@
 
 <body>
 
-  <!-- CABECERA CORREGIDA -->
+  <!-- CABECERA CENTRADA -->
   <div id="headerBar">
     <div class="logo-title">🚗 GLOW</div>
     <button id="themeToggle" class="icon-btn">🌙</button>
