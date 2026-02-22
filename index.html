@@ -40,23 +40,31 @@
       width: 100%;
       max-width: 430px;
       display: flex;
-      justify-content: space-between; /* coche+GLOW a la izquierda, icono a la derecha */
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
     }
-#headerBar h1 {
-  margin-left: 100px;
-  margin-top: 0;
-  margin-bottom: 0;
-  font-size: 2.3em;
-  color: #00e5ff;
-  text-shadow: 0 0 10px #00e5ff;
-  white-space: nowrap;
-  line-height: 1;
-  position: relative;   /* ← NECESARIO */
-  top: 1px;             /* ← AJUSTE FINO */
-}
 
+    #headerBar h1 {
+      margin-left: 100px;
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 2.3em;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff;
+      white-space: nowrap;
+      line-height: 1;
+      position: relative;
+      top: 1px;
+    }
+
+    /* AJUSTE ESPECIAL PARA MÓVILES */
+    @media (max-width: 480px) {
+      #headerBar h1 {
+        margin-left: 20px;
+        top: 1px;
+      }
+    }
 
     .icon-btn {
       background: none;
@@ -310,19 +318,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
