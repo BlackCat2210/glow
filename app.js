@@ -40,8 +40,7 @@ function parseAmount(value) {
 }
 
 function getYearMonth(dateStr) {
-  // dateStr: "YYYY-MM-DD"
-  return dateStr.slice(0, 7);
+  return dateStr.slice(0, 7); // YYYY-MM
 }
 
 function getYear(dateStr) {
@@ -84,7 +83,7 @@ function renderHistory(expenses) {
     return;
   }
 
-  expenses.forEach((exp, index) => {
+  expenses.forEach(exp => {
     const div = document.createElement('div');
     div.className = 'history-item';
 
@@ -120,7 +119,7 @@ function updateStats(expenses) {
   }
 
   const now = new Date();
-  const currentYearMonth = now.toISOString().slice(0, 7); // YYYY-MM
+  const currentYearMonth = now.toISOString().slice(0, 7);
   const currentYear = now.getFullYear().toString();
 
   let totalMonth = 0;
@@ -205,6 +204,35 @@ function toggleHistory() {
 
   card.style.display = isHidden ? 'block' : 'none';
   btn.innerText = isHidden ? 'Ocultar historial' : 'Ver historial completo';
+}
+
+// ===============================
+//  MODO DÍA / NOCHE
+// ===============================
+const themeToggle = document.getElementById('themeToggle');
+
+// Cargar tema guardado
+if (localStorage.getItem('glowTheme') === 'light') {
+  document.body.classList.add('light');
+}
+
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('light');
+
+  if (document.body.classList.contains('light')) {
+    localStorage.setItem('glowTheme', 'light');
+  } else {
+    localStorage.setItem('glowTheme', 'dark');
+  }
+});
+
+// ===============================
+//  SALIR DE LA APLICACIÓN
+// ===============================
+function exitApp() {
+  if (confirm('¿Quieres salir de la aplicación?')) {
+    window.location.href = "https://www.google.com";
+  }
 }
 
 // ===============================

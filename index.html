@@ -28,38 +28,109 @@
       padding-bottom: 80px;
       overscroll-behavior-y: none;
       min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
     }
+
+    body.light {
+      background-color: #f5f5f5;
+      color: #121212;
+    }
+
     .container { width: 100%; max-width: 480px; }
-    h1 { text-align: center; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; margin-bottom: 25px; font-size: 2.5em; }
-    .card { background: #1e1e1e; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); margin-bottom: 20px; }
+    h1 { text-align: center; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; margin-bottom: 15px; font-size: 2.5em; }
+
+    .card {
+      background: #1e1e1e;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+    }
+
+    body.light .card {
+      background: #ffffff;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
     label { display: block; margin-top: 15px; font-size: 1.05em; color: #b3b3b3; }
+    body.light label { color: #555; }
+
     input, select {
-      width: 100%; padding: 15px; margin-top: 8px;
-      background: #2d2d2d; border: 1px solid #444; color: white;
-      border-radius: 12px; box-sizing: border-box; font-size: 1.05em;
+      width: 100%;
+      padding: 15px;
+      margin-top: 8px;
+      background: #2d2d2d;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 12px;
+      font-size: 1.05em;
     }
+
+    body.light input, body.light select {
+      background: #f0f0f0;
+      border-color: #ccc;
+      color: #121212;
+    }
+
     button {
-      width: 100%; padding: 16px; margin-top: 20px;
-      background: #00e5ff; color: #121212; border: none;
-      border-radius: 12px; font-weight: bold; font-size: 1.1em;
-      cursor: pointer; transition: transform 0.1s;
+      width: 100%;
+      padding: 16px;
+      margin-top: 20px;
+      background: #00e5ff;
+      color: #121212;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: transform 0.1s;
     }
+
     button:active { transform: scale(0.98); background: #00b3cc; }
-    .btn-secondary { background: #2d2d2d; color: #00e5ff; margin-top: 10px; border: 1px solid #444; }
+
+    .btn-secondary {
+      background: #2d2d2d;
+      color: #00e5ff;
+      border: 1px solid #444;
+    }
+
+    body.light .btn-secondary {
+      background: #ffffff;
+      border-color: #ccc;
+      color: #0077ff;
+    }
+
     .history-item {
-      background: #2d2d2d; padding: 15px; border-radius: 12px;
-      margin-top: 12px; display: flex; justify-content: space-between; align-items: center;
+      background: #2d2d2d;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+
+    body.light .history-item {
+      background: #ffffff;
+      border: 1px solid #ddd;
+    }
+
     .delete-btn {
-      background: #ff4d4d; color: white; border: none;
-      border-radius: 8px; padding: 8px 10px; width: auto; font-size: 0.95em;
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.95em;
     }
+
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 10px;
     }
+
     .stat-box {
       background: #2d2d2d;
       border-radius: 12px;
@@ -68,6 +139,12 @@
       font-size: 0.9em;
       color: #b3b3b3;
     }
+
+    body.light .stat-box {
+      background: #f0f0f0;
+      color: #555;
+    }
+
     .stat-value {
       display: block;
       margin-top: 4px;
@@ -75,11 +152,20 @@
       color: #00e5ff;
       font-weight: bold;
     }
+
+    body.light .stat-value {
+      color: #0077ff;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
+
     <h1>🚘 GLOW</h1>
+
+    <!-- Botón Día/Noche -->
+    <button id="themeToggle" class="btn-secondary" style="margin-bottom:15px;">Modo día/noche</button>
 
     <div class="card">
       <label for="date">Fecha</label>
@@ -98,26 +184,30 @@
       </select>
 
       <label for="amount">Gasto (€)</label>
-      <input type="text" inputmode="decimal" id="amount" placeholder="Ej. 20,00 o 20.00">
+      <input type="text" inputmode="decimal" id="amount" placeholder="Ej. 20.00 o 20,00">
 
       <button onclick="addExpense()">Añadir repostaje</button>
     </div>
 
     <div class="card">
       <h2 style="font-size:1.1em;margin-top:0;text-align:center;color:#b3b3b3;">Resumen</h2>
+
       <div class="stats-grid">
         <div class="stat-box">
           Mes actual
           <span class="stat-value" id="currentMonthTotal">0.00 €</span>
         </div>
+
         <div class="stat-box">
           Año actual
           <span class="stat-value" id="currentYearTotal">0.00 €</span>
         </div>
+
         <div class="stat-box">
           Nº repostajes
           <span class="stat-value" id="totalCount">0</span>
         </div>
+
         <div class="stat-box">
           Media por repostaje
           <span class="stat-value" id="avgPerFill">0.00 €</span>
@@ -131,6 +221,10 @@
       <h2 style="font-size:1.1em;margin-top:0;border-bottom:1px solid #444;padding-bottom:10px;">Todos los repostajes</h2>
       <div id="historyList"></div>
     </div>
+
+    <!-- Botón Salir -->
+    <button class="btn-secondary" onclick="exitApp()" style="margin-top:20px;">Salir de la aplicación</button>
+
   </div>
 
   <script src="app.js"></script>
