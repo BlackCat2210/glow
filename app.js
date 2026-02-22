@@ -249,7 +249,7 @@ function toggleHistory() {
 }
 
 // ===============================
-//  GRÁFICO MENSUAL
+//  GRÁFICO MENSUAL (DÍAS ORDENADOS BIEN)
 // ===============================
 let chart;
 
@@ -264,12 +264,17 @@ function updateChart(expenses) {
 
   const days = {};
   filtered.forEach(exp => {
-    const day = exp.date.slice(8, 10);
+    const day = exp.date.slice(8, 10); // "06", "15", "29"
     days[day] = (days[day] || 0) + exp.amount;
   });
 
-  const labels = Object.keys(days);
-  const values = Object.values(days);
+  // ORDENAR LOS DÍAS NUMÉRICAMENTE Y FORMATEARLOS A 2 DÍGITOS
+  const labels = Object.keys(days)
+    .map(d => parseInt(d))                 // "06" -> 6
+    .sort((a, b) => a - b)                 // 6, 15, 29
+    .map(n => String(n).padStart(2, "0")); // 6 -> "06"
+
+  const values = labels.map(day => days[day]);
 
   const ctx = document.getElementById("monthlyChart").getContext("2d");
 
