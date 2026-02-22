@@ -62,7 +62,6 @@ function loadMonthYearSelectors() {
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
-  // Meses
   monthSelect.innerHTML = "";
   months.forEach((m, i) => {
     const opt = document.createElement("option");
@@ -72,7 +71,6 @@ function loadMonthYearSelectors() {
     monthSelect.appendChild(opt);
   });
 
-  // Años (últimos 5)
   yearSelect.innerHTML = "";
   for (let y = currentYear; y >= currentYear - 5; y--) {
     const opt = document.createElement("option");
@@ -249,7 +247,7 @@ function toggleHistory() {
 }
 
 // ===============================
-//  GRÁFICO MENSUAL (DÍAS ORDENADOS BIEN)
+//  GRÁFICO MENSUAL (VERSIÓN COMPATIBLE CON ANDROID)
 // ===============================
 let chart;
 
@@ -262,19 +260,29 @@ function updateChart(expenses) {
     return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
   });
 
-  const days = {};
-  filtered.forEach(exp => {
-    const day = exp.date.slice(8, 10); // "06", "15", "29"
-    days[day] = (days[day] || 0) + exp.amount;
+  // Convertimos a array para evitar problemas en móviles
+  const dayData = filtered.map(exp => ({
+    day: parseInt(exp.date.slice(8, 10)),   // 6, 15, 29
+    amount: exp.amount
+  }));
+
+  // Agrupar por día
+  const grouped = {};
+  dayData.forEach(item => {
+    grouped[item.day] = (grouped[item.day] || 0) + item.amount;
   });
 
-  // ORDENAR LOS DÍAS NUMÉRICAMENTE Y FORMATEARLOS A 2 DÍGITOS
-  const labels = Object.keys(days)
-    .map(d => parseInt(d))                 // "06" -> 6
-    .sort((a, b) => a - b)                 // 6, 15, 29
-    .map(n => String(n).padStart(2, "0")); // 6 -> "06"
+  // Convertimos a array ordenado
+  const sorted = Object.keys(grouped)
+    .map(d => parseInt(d))
+    .sort((a, b) => a - b)
+    .map(day => ({
+      day: String(day).padStart(2, "0"),
+      amount: grouped[day]
+    }));
 
-  const values = labels.map(day => days[day]);
+  const labels = sorted.map(item => item.day);
+  const values = sorted.map(item => item.amount);
 
   const ctx = document.getElementById("monthlyChart").getContext("2d");
 
