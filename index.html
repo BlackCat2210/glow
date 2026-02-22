@@ -35,11 +35,20 @@
       color: #121212;
     }
 
-    #topBar {
+    /* CABECERA NUEVA */
+    #headerBar {
       width: 100%;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
+    }
+
+    #headerBar h1 {
+      margin: 0;
+      font-size: 2.3em;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff;
     }
 
     .icon-btn {
@@ -55,14 +64,6 @@
     }
 
     .container { width: 100%; max-width: 430px; }
-
-    h1 {
-      text-align: center;
-      color: #00e5ff;
-      text-shadow: 0 0 10px #00e5ff;
-      margin-bottom: 15px;
-      font-size: 2.3em;
-    }
 
     .card {
       background: #1e1e1e;
@@ -189,6 +190,17 @@
       font-size: 0.9em;
     }
 
+    /* SELECTORES MES/AÑO EN UNA LÍNEA */
+    .month-year-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .month-year-row .col {
+      flex: 1;
+    }
+
     /* Gráfico */
     #chartContainer {
       margin-top: 20px;
@@ -205,22 +217,13 @@
 
 <body>
 
-  <div id="topBar">
+  <!-- CABECERA NUEVA -->
+  <div id="headerBar">
+    <h1>🚗 GLOW</h1>
     <button id="themeToggle" class="icon-btn">🌙</button>
   </div>
 
   <div class="container">
-
-    <h1>🚘 GLOW</h1>
-
-    <!-- Selector de mes y año -->
-    <div class="card">
-      <label>Mes</label>
-      <select id="monthSelect"></select>
-
-      <label>Año</label>
-      <select id="yearSelect"></select>
-    </div>
 
     <div class="card">
       <label for="date">Fecha</label>
@@ -266,6 +269,21 @@
         <div class="stat-box">
           Media por repostaje
           <span class="stat-value" id="avgPerFill">0.00 €</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELECTORES DE MES/AÑO REUBICADOS -->
+    <div class="card" id="monthYearCard">
+      <div class="month-year-row">
+        <div class="col">
+          <label>Mes</label>
+          <select id="monthSelect"></select>
+        </div>
+
+        <div class="col">
+          <label>Año</label>
+          <select id="yearSelect"></select>
         </div>
       </div>
     </div>
