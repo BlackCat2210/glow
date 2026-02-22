@@ -36,6 +36,26 @@
       color: #121212;
     }
 
+    /* Barra superior */
+    #topBar {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: #00e5ff;
+    }
+
+    body.light .icon-btn {
+      color: #0077ff;
+    }
+
     .container { width: 100%; max-width: 480px; }
     h1 { text-align: center; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; margin-bottom: 15px; font-size: 2.5em; }
 
@@ -160,12 +180,15 @@
 </head>
 
 <body>
+
+  <!-- Botón Día/Noche arriba a la derecha -->
+  <div id="topBar">
+    <button id="themeToggle" class="icon-btn">🌙</button>
+  </div>
+
   <div class="container">
 
     <h1>🚘 GLOW</h1>
-
-    <!-- Botón Día/Noche -->
-    <button id="themeToggle" class="btn-secondary" style="margin-bottom:15px;">Modo día/noche</button>
 
     <div class="card">
       <label for="date">Fecha</label>

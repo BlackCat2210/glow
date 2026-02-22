@@ -40,7 +40,7 @@ function parseAmount(value) {
 }
 
 function getYearMonth(dateStr) {
-  return dateStr.slice(0, 7); // YYYY-MM
+  return dateStr.slice(0, 7);
 }
 
 function getYear(dateStr) {
@@ -214,6 +214,9 @@ const themeToggle = document.getElementById('themeToggle');
 // Cargar tema guardado
 if (localStorage.getItem('glowTheme') === 'light') {
   document.body.classList.add('light');
+  themeToggle.textContent = "☀️";
+} else {
+  themeToggle.textContent = "🌙";
 }
 
 themeToggle.addEventListener('click', () => {
@@ -221,8 +224,10 @@ themeToggle.addEventListener('click', () => {
 
   if (document.body.classList.contains('light')) {
     localStorage.setItem('glowTheme', 'light');
+    themeToggle.textContent = "☀️";
   } else {
     localStorage.setItem('glowTheme', 'dark');
+    themeToggle.textContent = "🌙";
   }
 });
 
@@ -231,7 +236,7 @@ themeToggle.addEventListener('click', () => {
 // ===============================
 function exitApp() {
   if (confirm('¿Quieres salir de la aplicación?')) {
-    window.location.href = "https://www.google.com";
+    window.open("https://www.google.com", "_self");
   }
 }
 
