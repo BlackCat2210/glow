@@ -6,14 +6,14 @@
   <title>GLOW - Gasolina</title>
 
   <link rel="manifest" href="manifest.json">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#121212">
 
   <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
@@ -21,12 +21,11 @@
       background-color: #121212;
       color: #ffffff;
       margin: 0;
-      padding: 20px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding-bottom: 80px;
-      overscroll-behavior-y: none;
       min-height: 100vh;
       transition: background-color 0.3s, color 0.3s;
     }
@@ -36,7 +35,6 @@
       color: #121212;
     }
 
-    /* Barra superior */
     #topBar {
       width: 100%;
       display: flex;
@@ -56,13 +54,20 @@
       color: #0077ff;
     }
 
-    .container { width: 100%; max-width: 480px; }
-    h1 { text-align: center; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; margin-bottom: 15px; font-size: 2.5em; }
+    .container { width: 100%; max-width: 430px; }
+
+    h1 {
+      text-align: center;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff;
+      margin-bottom: 15px;
+      font-size: 2.3em;
+    }
 
     .card {
       background: #1e1e1e;
-      padding: 25px;
-      border-radius: 20px;
+      padding: 20px;
+      border-radius: 18px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.4);
       margin-bottom: 20px;
     }
@@ -72,18 +77,25 @@
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
 
-    label { display: block; margin-top: 15px; font-size: 1.05em; color: #b3b3b3; }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 1em;
+      color: #b3b3b3;
+    }
+
     body.light label { color: #555; }
 
     input, select {
       width: 100%;
-      padding: 15px;
-      margin-top: 8px;
+      padding: 12px;
+      margin-top: 6px;
       background: #2d2d2d;
       border: 1px solid #444;
       color: white;
-      border-radius: 12px;
-      font-size: 1.05em;
+      border-radius: 10px;
+      font-size: 1em;
+      box-sizing: border-box;
     }
 
     body.light input, body.light select {
@@ -94,19 +106,19 @@
 
     button {
       width: 100%;
-      padding: 16px;
-      margin-top: 20px;
+      padding: 14px;
+      margin-top: 18px;
       background: #00e5ff;
       color: #121212;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       font-weight: bold;
-      font-size: 1.1em;
+      font-size: 1.05em;
       cursor: pointer;
       transition: transform 0.1s;
     }
 
-    button:active { transform: scale(0.98); background: #00b3cc; }
+    button:active { transform: scale(0.98); }
 
     .btn-secondary {
       background: #2d2d2d;
@@ -118,30 +130,6 @@
       background: #ffffff;
       border-color: #ccc;
       color: #0077ff;
-    }
-
-    .history-item {
-      background: #2d2d2d;
-      padding: 15px;
-      border-radius: 12px;
-      margin-top: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    body.light .history-item {
-      background: #ffffff;
-      border: 1px solid #ddd;
-    }
-
-    .delete-btn {
-      background: #ff4d4d;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 0.95em;
     }
 
     .stats-grid {
@@ -176,12 +164,47 @@
     body.light .stat-value {
       color: #0077ff;
     }
+
+    .history-item {
+      background: #2d2d2d;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    body.light .history-item {
+      background: #ffffff;
+      border: 1px solid #ddd;
+    }
+
+    .delete-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 0.9em;
+    }
+
+    /* Gráfico */
+    #chartContainer {
+      margin-top: 20px;
+      padding: 15px;
+      background: #1e1e1e;
+      border-radius: 15px;
+    }
+
+    body.light #chartContainer {
+      background: #ffffff;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- Botón Día/Noche arriba a la derecha -->
   <div id="topBar">
     <button id="themeToggle" class="icon-btn">🌙</button>
   </div>
@@ -189,6 +212,15 @@
   <div class="container">
 
     <h1>🚘 GLOW</h1>
+
+    <!-- Selector de mes y año -->
+    <div class="card">
+      <label>Mes</label>
+      <select id="monthSelect"></select>
+
+      <label>Año</label>
+      <select id="yearSelect"></select>
+    </div>
 
     <div class="card">
       <label for="date">Fecha</label>
@@ -213,7 +245,7 @@
     </div>
 
     <div class="card">
-      <h2 style="font-size:1.1em;margin-top:0;text-align:center;color:#b3b3b3;">Resumen</h2>
+      <h2 style="text-align:center;color:#b3b3b3;">Resumen</h2>
 
       <div class="stats-grid">
         <div class="stat-box">
@@ -238,15 +270,19 @@
       </div>
     </div>
 
+    <!-- Gráfico -->
+    <div id="chartContainer" class="card">
+      <canvas id="monthlyChart"></canvas>
+    </div>
+
     <button class="btn-secondary" id="toggleBtn" onclick="toggleHistory()">Ver historial completo</button>
 
-    <div class="card" id="historyCard" style="display:none;margin-top:20px;">
-      <h2 style="font-size:1.1em;margin-top:0;border-bottom:1px solid #444;padding-bottom:10px;">Todos los repostajes</h2>
+    <div class="card" id="historyCard" style="display:none;">
+      <h2 style="border-bottom:1px solid #444;padding-bottom:10px;">Todos los repostajes</h2>
       <div id="historyList"></div>
     </div>
 
-    <!-- Botón Salir -->
-    <button class="btn-secondary" onclick="exitApp()" style="margin-top:20px;">Salir de la aplicación</button>
+    <button class="btn-secondary" onclick="exitApp()">Salir de la aplicación</button>
 
   </div>
 

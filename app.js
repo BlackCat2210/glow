@@ -1,5 +1,5 @@
 // ===============================
-//  FIREBASE CONFIG (tu proyecto)
+//  FIREBASE CONFIG
 // ===============================
 const firebaseConfig = {
   apiKey: "AIzaSyA_q1WwLLEuEk_oaH3s-cy6Huv4sRG08",
@@ -27,7 +27,10 @@ const currentYearTotalEl = document.getElementById('currentYearTotal');
 const totalCountEl = document.getElementById('totalCount');
 const avgPerFillEl = document.getElementById('avgPerFill');
 
-// Fecha por defecto: hoy
+const monthSelect = document.getElementById('monthSelect');
+const yearSelect = document.getElementById('yearSelect');
+
+// Fecha por defecto
 dateInput.value = new Date().toISOString().split('T')[0];
 
 // ===============================
@@ -35,8 +38,7 @@ dateInput.value = new Date().toISOString().split('T')[0];
 // ===============================
 function parseAmount(value) {
   if (!value) return NaN;
-  const normalized = value.replace(',', '.').trim();
-  return parseFloat(normalized);
+  return parseFloat(value.replace(',', '.').trim());
 }
 
 function getYearMonth(dateStr) {
@@ -48,8 +50,46 @@ function getYear(dateStr) {
 }
 
 // ===============================
+//  SELECTOR DE MESES Y AÑOS
+// ===============================
+function loadMonthYearSelectors() {
+  const months = [
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+  ];
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  // Meses
+  monthSelect.innerHTML = "";
+  months.forEach((m, i) => {
+    const opt = document.createElement("option");
+    opt.value = i + 1;
+    opt.textContent = m;
+    if (i === currentMonth) opt.selected = true;
+    monthSelect.appendChild(opt);
+  });
+
+  // Años (últimos 5)
+  yearSelect.innerHTML = "";
+  for (let y = currentYear; y >= currentYear - 5; y--) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    yearSelect.appendChild(opt);
+  }
+}
+
+monthSelect.addEventListener("change", loadExpenses);
+yearSelect.addEventListener("change", loadExpenses);
+
+// ===============================
 //  CARGAR REPOSTAJES
 // ===============================
+let allExpenses = [];
+
 async function loadExpenses() {
   historyList.innerHTML = '<p>Cargando...</p>';
 
@@ -59,13 +99,15 @@ async function loadExpenses() {
       .orderBy('createdAt', 'desc')
       .get();
 
-    const expenses = [];
+    allExpenses = [];
     snapshot.forEach(doc => {
-      expenses.push({ id: doc.id, ...doc.data() });
+      allExpenses.push({ id: doc.id, ...doc.data() });
     });
 
-    renderHistory(expenses);
-    updateStats(expenses);
+    renderHistory(allExpenses);
+    updateStats(allExpenses);
+    updateChart(allExpenses);
+
   } catch (e) {
     console.error('Error cargando datos:', e);
     historyList.innerHTML = '<p>Error cargando datos.</p>';
@@ -207,11 +249,59 @@ function toggleHistory() {
 }
 
 // ===============================
+//  GRÁFICO MENSUAL
+// ===============================
+let chart;
+
+function updateChart(expenses) {
+  const selectedMonth = parseInt(monthSelect.value);
+  const selectedYear = parseInt(yearSelect.value);
+
+  const filtered = expenses.filter(exp => {
+    const d = new Date(exp.date);
+    return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+  });
+
+  const days = {};
+  filtered.forEach(exp => {
+    const day = exp.date.slice(8, 10);
+    days[day] = (days[day] || 0) + exp.amount;
+  });
+
+  const labels = Object.keys(days);
+  const values = Object.values(days);
+
+  const ctx = document.getElementById("monthlyChart").getContext("2d");
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Gasto (€)",
+        data: values,
+        backgroundColor: "#00e5ff88",
+        borderColor: "#00e5ff",
+        borderWidth: 2,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+// ===============================
 //  MODO DÍA / NOCHE
 // ===============================
 const themeToggle = document.getElementById('themeToggle');
 
-// Cargar tema guardado
 if (localStorage.getItem('glowTheme') === 'light') {
   document.body.classList.add('light');
   themeToggle.textContent = "☀️";
@@ -243,4 +333,5 @@ function exitApp() {
 // ===============================
 //  INICIALIZAR
 // ===============================
+loadMonthYearSelectors();
 loadExpenses();
