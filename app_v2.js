@@ -363,11 +363,10 @@ themeToggle.addEventListener('click', () => {
 // ===============================
 function exitApp() { alert("Para cerrar la aplicación, desliza hacia arriba y ciérrala desde el menú de apps recientes.");
  }
-  }
-
 
 // ===============================
 //  INICIALIZAR
 // ===============================
 loadMonthYearSelectors();
 loadExpenses();
+
