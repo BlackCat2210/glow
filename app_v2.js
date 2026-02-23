@@ -30,6 +30,9 @@ const avgPerFillEl = document.getElementById('avgPerFill');
 const monthSelect = document.getElementById('monthSelect');
 const yearSelect = document.getElementById('yearSelect');
 
+// NUEVO: elemento para mostrar total del mes seleccionado
+let selectedMonthTotalEl;
+
 // Fecha por defecto
 dateInput.value = new Date().toISOString().split('T')[0];
 
@@ -247,7 +250,7 @@ function toggleHistory() {
 }
 
 // ===============================
-//  GRÁFICO MENSUAL (VERSIÓN COMPATIBLE CON ANDROID)
+//  GRÁFICO MENSUAL (MEJORADO)
 // ===============================
 let chart;
 
@@ -260,19 +263,34 @@ function updateChart(expenses) {
     return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
   });
 
+  // Total del mes seleccionado
+  const totalSelectedMonth = filtered.reduce((sum, exp) => sum + exp.amount, 0);
+
+  // Crear texto encima de la gráfica si no existe
+  if (!selectedMonthTotalEl) {
+    selectedMonthTotalEl = document.createElement("h3");
+    selectedMonthTotalEl.style.textAlign = "center";
+    selectedMonthTotalEl.style.marginTop = "10px";
+    selectedMonthTotalEl.style.color = "#00e5ff";
+    selectedMonthTotalEl.style.fontWeight = "bold";
+    const chartContainer = document.getElementById("chartContainer");
+    chartContainer.parentNode.insertBefore(selectedMonthTotalEl, chartContainer);
+  }
+
+  selectedMonthTotalEl.textContent =
+    `Total del mes seleccionado: ${totalSelectedMonth.toFixed(2)} €`;
+
   // Convertimos a array para evitar problemas en móviles
   const dayData = filtered.map(exp => ({
-    day: parseInt(exp.date.slice(8, 10)),   // 6, 15, 29
+    day: parseInt(exp.date.slice(8, 10)),
     amount: exp.amount
   }));
 
-  // Agrupar por día
   const grouped = {};
   dayData.forEach(item => {
     grouped[item.day] = (grouped[item.day] || 0) + item.amount;
   });
 
-  // Convertimos a array ordenado
   const sorted = Object.keys(grouped)
     .map(d => parseInt(d))
     .sort((a, b) => a - b)
@@ -304,7 +322,13 @@ function updateChart(expenses) {
     options: {
       responsive: true,
       scales: {
-        y: { beginAtZero: true }
+        x: {
+          ticks: { color: "#00e5ff" }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: "#00e5ff" }
+        }
       }
     }
   });
