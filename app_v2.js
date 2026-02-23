@@ -361,11 +361,10 @@ themeToggle.addEventListener('click', () => {
 // ===============================
 //  SALIR DE LA APLICACIÓN
 // ===============================
-function exitApp() {
-  if (confirm('¿Quieres salir de la aplicación?')) {
-    window.location.href = "about:blank";
+function exitApp() { alert("Para cerrar la aplicación, desliza hacia arriba y ciérrala desde el menú de apps recientes.");
+ }
   }
-}
+
 
 // ===============================
 //  INICIALIZAR
