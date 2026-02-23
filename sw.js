@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glow-cache-v5';
+const CACHE_NAME = 'glow-cache-v6';
 
 const ASSETS = [
   './',
@@ -28,3 +28,4 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(res => res || fetch(event.request))
   );
 });
+
