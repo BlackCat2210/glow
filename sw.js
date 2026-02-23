@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glow-cache-v1';
+const CACHE_NAME = 'glow-cache-v2';
 
 const ASSETS = [
   './',
