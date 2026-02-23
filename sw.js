@@ -1,9 +1,9 @@
-const CACHE_NAME = 'glow-cache-v2';
+const CACHE_NAME = 'glow-cache-v3';
 
 const ASSETS = [
   './',
   './index.html',
-  './app.js',
+  './app_v2.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
