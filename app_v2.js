@@ -363,7 +363,7 @@ themeToggle.addEventListener('click', () => {
 // ===============================
 function exitApp() {
   if (confirm('¿Quieres salir de la aplicación?')) {
-    window.open("https://www.google.com", "_self");
+    window.location.href = "about:blank";
   }
 }
 
